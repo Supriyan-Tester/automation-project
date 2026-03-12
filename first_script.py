@@ -1,0 +1,42 @@
+from playwright.sync_api import sync_playwright
+with sync_playwright() as p:
+
+    browser = p.chromium.launch(headless=False)
+    page = browser.new_page()
+    page.goto("https://www.saucedemo.com")
+    page.locator("#user-name").fill("standard_user")
+    page.locator("#password").fill("secret_sauce")
+    page.locator("#login-button").click()
+    print(page.url)
+    page.screenshot(path="inventory_page.png")
+    page.get_by_text("Sauce Labs Backpack").click()
+    page.screenshot(path="Sauce_Labs_Backpack_product_page.png")
+    print(page.url)
+    page.locator("#add-to-cart").click()
+    print(page.url)
+    print("Product has been added to the cart successfully.")
+    cart_count = page.locator(".shopping_cart_badge").inner_text()
+    assert cart_count == "1", f"Expected cart count to be 1, but got {cart_count}"
+    print(f"Cart count is correct: {cart_count}")
+    page.locator(".shopping_cart_link").click()
+    print(page.url )
+    assert page.url == "https://www.saucedemo.com/cart.html", f"Expected URL to be 'https://www.saucedemo.com/cart.html', but got {page.url}"
+    print ("Navigated to cart page successfully.")
+    page.locator('#checkout').click()
+    page.locator("#first-name").fill("Testing")
+    page.locator("#last-name").fill("QA")
+    page.locator("#postal-code").fill("643210")
+    page.screenshot(path="Form-filled.png")
+    page.locator("#continue").click()
+    print(page.url)
+    assert page.url == "https://www.saucedemo.com/checkout-step-two.html", f"Expected URL to be 'https://www.saucedemo.com/checkout-step-two.html', but got {page.url}"
+    print("Navigated to second page successfully")
+    page.locator("#finish").click()
+    assert page.get_by_text("Thank you for your order!").is_visible()
+    print("order was placed successfully")
+    page.locator("#back-to-products").click()
+    print(page.url)
+    assert page.url == "https://www.saucedemo.com/inventory.html", f"Expected url to be 'https://www.saucedemo.com/inventory.html', but got {page.url}"
+    print("returned to Homepage Successfully")        
+    page.wait_for_timeout(5000)
+    browser.close()
